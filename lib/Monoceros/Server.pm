@@ -234,7 +234,7 @@ my $prev_stats = '';
 sub update_stats {
     my $self = shift;
     my $total = scalar keys %{$self->{sockets}};
-    my $processing = scalar grep { !$self->{sockets}{$_}[S_STATE] == 1 } keys %{$self->{sockets}};
+    my $processing = scalar grep { $self->{sockets}{$_}[S_STATE] == 1 } keys %{$self->{sockets}};
     my $idle = scalar grep { $self->{sockets}{$_}[S_STATE] == 0 } keys %{$self->{sockets}};
 
     my $stats = "total=$total&";
