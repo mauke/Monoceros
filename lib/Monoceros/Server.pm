@@ -279,23 +279,24 @@ sub connection_manager {
     my $i = 0;
     my $sig2;$sig2 = AE::signal 'USR1', sub {
         my $t;$t = AE::timer 0, 1, sub {
-            if ( not $close_all && $i < 4 ) {
-                return;
-            }
-            elsif ( $i >= 4 ) {
+            ++$i;
+            if ( !$close_all ) {
+                if ( $i < 4 ) {
+                    return;
+                }
                 warn "Worker $worker_pid sockets did not close in time. Forcing abort.";
             }
             undef $t;
             kill 'TERM', $worker_pid;
-            ++$i;
             my $j = 0;
             my $t2;$t2 = AE::timer 0, 1, sub {
                 my $kid = waitpid($worker_pid, WNOHANG);
                 ++$j;
-                if ( $kid >= 0 && $j < 60 ) {
-                    return;
-                }
-                elsif ( $j >= 60 ) {
+                if ( $kid == 0 ) {
+                    # still running
+                    if ( $j < 60 ) {
+                        return;
+                    }
                     warn "Worker $worker_pid still here after $j iterations. Forcing abort.";
                 }
                 undef $t2;
