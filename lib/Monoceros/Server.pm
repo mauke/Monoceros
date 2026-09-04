@@ -968,7 +968,8 @@ sub _handle_response {
         my $buf = $body->[0];
         if ($use_chunked ) {
             my $len = length $buf;
-            $buf = sprintf("%x",$len) . "\015\012" . $buf . "\015\012" . '0' . "\015\012\015\012";
+            $buf = sprintf("%x",$len) . "\015\012" . $buf . "\015\012" if $len;
+            $buf .= '0' . "\015\012\015\012";
         }
         my $len = $self->write_all(
             $conn, join('', @lines, $buf), $self->{timeout},
